@@ -171,9 +171,9 @@
 (defmethod extensions/create-queue HornetQConnection
   [queue task]
   (let [session (extensions/create-tx-session queue)
-        ingress-queue (:ingress-queues task)
+        ingress-queues (vals (:ingress-queues task))
         egress-queues (vals (:egress-queues task))]
-    (doseq [queue-name (conj egress-queues ingress-queue)]
+    (doseq [queue-name (concat ingress-queues egress-queues)]
       (extensions/create-queue-on-session queue session queue-name))
     (.close session)))
 
@@ -230,7 +230,7 @@
 (defmethod extensions/bootstrap-queue HornetQConnection
   [queue task]
   (let [session (extensions/create-tx-session queue)
-        producer (extensions/create-producer queue session (:ingress-queues task))]
+        producer (extensions/create-producer queue session (:self (:ingress-queues task)))]
     (extensions/produce-message queue producer session (.array (fressian/write {})))
     (extensions/produce-message queue producer session (.array (fressian/write :done)))
     (extensions/commit-tx queue session)
