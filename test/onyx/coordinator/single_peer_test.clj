@@ -96,7 +96,7 @@
                      :onyx/medium :hornetq
                      :onyx/consumption :sequential
                      :hornetq/queue-name "out-queue"}]
-           workflow {:in {:inc :out}}
+           workflow [[:in :inc] [:inc :out]]
            offer-ch-spy (chan 1)
            job-ch (chan 1)
            node (extensions/create sync :plan)
@@ -133,13 +133,13 @@
                   (facts ":inc's ingress queue is :in's egress queues"
                          (let [in (first (filter #(= (:task/name %) :in) tasks))
                                inc (first (filter #(= (:task/name %) :inc) tasks))]
-                           (fact (:task/ingress-queues inc) =>
+                           (fact (:in (:task/ingress-queues inc)) =>
                                  (first (:task/egress-queues in)))))
 
                   (facts ":out's ingess queue is :inc's egress queue"
                          (let [inc (first (filter #(= (:task/name %) :inc) tasks))
                                out (first (filter #(= (:task/name %) :out) tasks))]
-                           (fact (:task/ingress-queues out) =>
+                           (fact (:inc (:task/ingress-queues out)) =>
                                  (first (:task/egress-queues inc)))))
 
                   (facts ":out's egress queue is generated"
@@ -244,7 +244,7 @@
                      :onyx/medium :hornetq
                      :onyx/consumption :sequential
                      :hornetq/queue-name "out-queue"}]
-           workflow {:in {:inc :out}}]
+           workflow [[:in :inc] [:inc :out]]]
 
        (tap (:ack-mult coordinator) ack-ch-spy)
        (tap (:offer-mult coordinator) offer-ch-spy)
@@ -322,7 +322,7 @@
                      :onyx/type :output
                      :onyx/medium :hornetq
                      :hornetq/queue-name "out-queue"}]
-           workflow {:in {:inc :out}}
+           workflow [[:in :inc] [:inc :out]]
 
            peer (extensions/create sync :peer)
            pulse (extensions/create sync :pulse)
@@ -447,7 +447,7 @@
                      :onyx/medium :hornetq
                      :onyx/consumption :sequential
                      :hornetq/queue-name "out-queue"}]
-           workflow {:in {:inc :out}}]
+           workflow [[:in :inc] [:inc :out]]]
 
        (extensions/create sync :born-log (:node peer))
        (extensions/write-node sync (:node peer)

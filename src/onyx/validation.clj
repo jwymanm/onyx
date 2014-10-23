@@ -25,7 +25,7 @@
                     (if (map? v)
                       (flatten-workflow v)
                       (list v)))
-            (vals workflow))))
+                  (vals workflow))))
 
 (defn validate-workflow-names [{:keys [workflow catalog]}]
   (when-let [missing-names (->> workflow
